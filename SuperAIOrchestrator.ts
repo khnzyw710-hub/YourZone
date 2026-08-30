@@ -1,5 +1,4 @@
 import { Platform } from 'react-native';
-import axios from 'axios';
 
 export type AIModel = 'GPT-4o' | 'Claude-3.5-Sonnet' | 'Gemini-1.5-Pro' | 'Sora' | 'Suno/Udio' | 'Flux-Dev';
 
@@ -97,20 +96,13 @@ export class SuperAIOrchestrator {
           finalPayload += `\n[Context from dependent task ${depId}]: ${JSON.stringify(results[depId])}`;
         });
 
-        try {
-          const response = await axios.post('https://api.nexus-core.io/v2/swarm/execute', {
-            model: task.model,
-            payload: finalPayload,
-            sessionToken: "SECURE_EPHEMERAL_TOKEN"
-          }, { timeout: 60000 });
-
-          task.status = 'completed';
-          task.result = response.data.output;
-          results[task.id] = response.data.output;
-        } catch (error) {
-          task.status = 'failed';
-          results[task.id] = `Agent execution failed for ${task.model}`;
-        }
+        // No real multi-model backend is wired up yet — simulate the swarm locally
+        // so the UI has something real to show instead of failing every task.
+        await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 900));
+        const output = `[simulated ${task.model} output] ${finalPayload.slice(0, 160)}`;
+        task.status = 'completed';
+        task.result = output;
+        results[task.id] = output;
         onProgress([...tasks]);
       });
 
